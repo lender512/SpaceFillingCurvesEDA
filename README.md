@@ -35,9 +35,8 @@ La función intercalado usada para añadir un cero entre cada bit, para posterio
   
 ### Gray-order
 - Se obtiene el Z-order
-- Se aplica gray code (XOR entre el valor y el valor desplazado a la derecha)
+- Se aplica inverse gray code
 
 ### Double Gray-order
-- Se aplica gray code a cada coordenada
 - Se obtiene el Z-order
-- Se aplica gray code (XOR entre el valor y el valor desplazado a la derecha)
+- Se aplica gray code
