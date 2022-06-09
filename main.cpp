@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <vector>
+#include <iostream>
+#include <math.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/System.hpp>
@@ -40,7 +42,7 @@ Como correrlo:
     g++ -c main.cpp
     g++ main.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-system
     ./sfml-app
-
+bool isAnimated = false;
     O resumido:
     g++ -std=c++17 -g -c main.cpp &&  g++ -g main.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-system && ./sfml-app
 */
@@ -50,6 +52,7 @@ Variables globales importantes
 ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
 int MAX_BITS = 32;
 int scaling = 50;
+bool isAnimated = false;
 uint32_t width = 850, height = 850;
 sf::RenderWindow window(sf::VideoMode(width - 2*scaling, height - 2*scaling), "Space-Filling Curve");
 
@@ -152,14 +155,150 @@ void draw_curve(Type type) {
             sf::Vertex(sf::Vector2f(vec[i + 1].x * scaling, vec[i + 1].y * scaling), color)
         };
         window.draw(line1, 2, sf::Lines);
-        // sf::sleep(sf::milliseconds(100));
-        // window.display();
+        if (!isAnimated) continue;
+        sf::sleep(sf::milliseconds(100));
+        window.display();
     }
 }
+
+
 /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
 Se define el tipo de curva por defecto 
 ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
 Type current_type = GRAY;
+
+void draw_curve_iterative(Type type) {
+    vec.clear();
+    for (uint32_t j = 0; j < height/scaling -1; j++) {
+        for (uint32_t i = 0; i < width/scaling - 1; i++) {
+            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+            Switch para determinar el tipo de curva que se
+            se va a dibujar
+            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+            switch (type)
+            {
+            case GRAY:
+                {vec.push_back({ i, j, gray_code(intercalado(i) | (intercalado(j) << 1)) });
+                break;}
+            
+            case DOUBLE_GRAY:
+                {vec.push_back({ i, j, gray_code(intercalado(gray_code(i)) | (intercalado(gray_code(j)) << 1)) });
+                break;}
+            
+            case Z_ORDER:
+                {vec.push_back({ i, j, intercalado(i) | (intercalado(j) << 1) });
+                break;}
+            
+            }
+        }
+        }
+        std::sort(vec.begin(), vec.end(), [] (Pixel& a, Pixel& b) {return a.transform < b.transform;});
+        for (int j = 0; j < vec.size()-1; j++) {
+            window.clear();
+            for (int i = 0; i < j-1; i++) {
+
+            sf::Color color(0, 255, 255);
+            sf::Vertex line1[] = {
+                sf::Vertex(sf::Vector2f(vec[i].x* scaling, vec[i].y * scaling), color),
+                sf::Vertex(sf::Vector2f(vec[i + 1].x * scaling, vec[i + 1].y * scaling), color)
+            };
+            window.draw(line1, 2, sf::Lines);
+            // if (!isAnimated) continue;
+            }
+            sf::Event event;
+            window.pollEvent(event);
+            switch (event.type){
+                case sf::Event::KeyPressed:
+                {
+                    switch (event.key.code)
+                    {
+                        case sf::Keyboard::Add:
+                        {
+                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+                            Si se presiona el +, el factor de escalado 
+                            aumenta hasta que llegue un máximo 1000
+                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+                            if (!(scaling-1000)) break;
+                            scaling++;
+                            return;
+                            break;
+                        }
+                        case sf::Keyboard::Subtract:
+                        {
+                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+                            Si se presiona el -, el factor de escalado 
+                            disminuye hasta que llegue un mínimo de 5
+                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+                            if (scaling < 5) break;
+                            scaling--;
+                            return;
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case sf::Event::KeyReleased:
+                {
+                    switch (event.key.code)
+                    {
+                        case sf::Keyboard::Space:
+                        {
+                            isAnimated = !isAnimated;
+                            break;
+                        }
+                        case sf::Keyboard::Num1:
+                        {
+                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+                            Si se presiona el 1, entonces se muestra el
+                            GRAY filling curve.
+                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+                            if (current_type == GRAY) break;
+                            current_type = GRAY;
+                            return;
+                            break;
+                        }
+                        case sf::Keyboard::Num2:
+                        {
+                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+                            Si se presiona el 2, entonces se muestra el
+                            DOUBLE_GRAY filling curve.
+                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+                            if (current_type == DOUBLE_GRAY) break;
+                            current_type = DOUBLE_GRAY;
+                            return;
+                            break;
+                        }
+                        case sf::Keyboard::Num3:
+                        {
+                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+                            Si se presiona el 3, entonces se muestra el
+                            Z_ORDER filling curve.
+                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+                            if (current_type == Z_ORDER) break;
+                            current_type = Z_ORDER;
+                            return;
+                            break;
+                        }
+                    }
+                }
+            }
+            window.display();
+            sf::sleep(sf::microseconds(1323/70*scaling*scaling + 2101/14*scaling - 8275/7));
+            std::cout << scaling << std::endl;
+    }
+
+    /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+    Se ordenan los futuros puntos segun el valor
+    que les asignó la curva.
+    ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+
+    /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+    Se pintanlas lineas
+    ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+    
+}
+
+
 
 int main() {
     draw_curve(current_type);
@@ -188,9 +327,6 @@ int main() {
                             ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
                             if (!(scaling-1000)) break;
                             scaling++;
-                            window.clear();
-                            draw_curve(current_type);
-                            window.display();
                             break;
                         }
                         case sf::Keyboard::Subtract:
@@ -201,9 +337,6 @@ int main() {
                             ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
                             if (scaling < 5) break;
                             scaling--;
-                            window.clear();
-                            draw_curve(current_type);
-                            window.display();
                             break;
                         }
                     }
@@ -213,6 +346,11 @@ int main() {
                 {
                     switch (event.key.code)
                     {
+                        case sf::Keyboard::Space:
+                        {
+                            isAnimated = !isAnimated;
+                            break;
+                        }
                         case sf::Keyboard::Num1:
                         {
                             /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
@@ -221,9 +359,6 @@ int main() {
                             ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
                             if (current_type == GRAY) break;
                             current_type = GRAY;
-                            window.clear();
-                            draw_curve(current_type);
-                            window.display();
                             break;
                         }
                         case sf::Keyboard::Num2:
@@ -234,9 +369,7 @@ int main() {
                             ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
                             if (current_type == DOUBLE_GRAY) break;
                             current_type = DOUBLE_GRAY;
-                            window.clear();
-                            draw_curve(current_type);
-                            window.display();
+                            
                             break;
                         }
                         case sf::Keyboard::Num3:
@@ -247,9 +380,6 @@ int main() {
                             ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
                             if (current_type == Z_ORDER) break;
                             current_type = Z_ORDER;
-                            window.clear();
-                            draw_curve(current_type);
-                            window.display();
                             break;
                         }
                     }
@@ -258,9 +388,10 @@ int main() {
                 
             }
         }
-        // window.clear();
+        window.clear();
+        draw_curve_iterative(current_type);
         // draw_curve(current_type);
-        // window.display();
+        window.display();
 
     }
 
