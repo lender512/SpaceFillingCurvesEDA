@@ -121,16 +121,16 @@ void draw_curve(Type type) {
             switch (type)
             {
             case GRAY:
-                vec.push_back({ i, j, gray_code(intercalado(i) | (intercalado(j) << 1)) });
-                break;
+                {vec.push_back({ i, j, gray_code(intercalado(i) | (intercalado(j) << 1)) });
+                break;}
             
             case DOUBLE_GRAY:
-                vec.push_back({ i, j, gray_code(intercalado(gray_code(i)) | (intercalado(gray_code(j)) << 1)) });
-                break;
+                {vec.push_back({ i, j, gray_code(intercalado(gray_code(i)) | (intercalado(gray_code(j)) << 1)) });
+                break;}
             
             case Z_ORDER:
-                vec.push_back({ i, j, intercalado(i) | (intercalado(j) << 1) });
-                break;
+                {vec.push_back({ i, j, intercalado(i) | (intercalado(j) << 1) });
+                break;}
             
             }
         }
@@ -163,6 +163,8 @@ Type current_type = GRAY;
 
 int main() {
     draw_curve(current_type);
+    window.display();
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -188,6 +190,7 @@ int main() {
                             scaling++;
                             window.clear();
                             draw_curve(current_type);
+                            window.display();
                             break;
                         }
                         case sf::Keyboard::Subtract:
@@ -200,6 +203,7 @@ int main() {
                             scaling--;
                             window.clear();
                             draw_curve(current_type);
+                            window.display();
                             break;
                         }
                     }
@@ -219,6 +223,7 @@ int main() {
                             current_type = GRAY;
                             window.clear();
                             draw_curve(current_type);
+                            window.display();
                             break;
                         }
                         case sf::Keyboard::Num2:
@@ -231,6 +236,7 @@ int main() {
                             current_type = DOUBLE_GRAY;
                             window.clear();
                             draw_curve(current_type);
+                            window.display();
                             break;
                         }
                         case sf::Keyboard::Num3:
@@ -243,15 +249,18 @@ int main() {
                             current_type = Z_ORDER;
                             window.clear();
                             draw_curve(current_type);
+                            window.display();
                             break;
                         }
-                        break;                        
                     }
+                    break;                        
                 }
                 
             }
         }
-        window.display();
+        // window.clear();
+        // draw_curve(current_type);
+        // window.display();
 
     }
 
