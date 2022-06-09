@@ -82,6 +82,8 @@ void draw_curve(Type type) {
             sf::Vertex(sf::Vector2f(vec[i + 1].x * scaling, vec[i + 1].y * scaling), color)
         };
         window.draw(line1, 2, sf::Lines);
+        // sf::sleep(sf::milliseconds(100));
+        // window.display();
     }
 }
 
