@@ -64,6 +64,15 @@ uint32_t gray_code(uint32_t n) {
 	return n ^ (n >> 1);
 }
 
+//gray code to binary
+uint32_t gray_code_to_binary(uint32_t gray) {
+    uint32_t binary=0;
+    for(;gray;gray=gray>>1)
+    {
+        binary^=gray; //binary=binary^gray;
+    }
+    return binary;
+}
 
 /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
     La función intercalado usada para añadir
@@ -123,12 +132,12 @@ void draw_curve(Type type) {
             ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
             switch (type)
             {
-            case GRAY:
+            case DOUBLE_GRAY:
                 {vec.push_back({ i, j, gray_code(intercalado(i) | (intercalado(j) << 1)) });
                 break;}
             
-            case DOUBLE_GRAY:
-                {vec.push_back({ i, j, gray_code(intercalado(gray_code(i)) | (intercalado(gray_code(j)) << 1)) });
+            case GRAY:
+                {vec.push_back({ i, j, gray_code_to_binary(intercalado(gray_code_to_binary(i)) | (intercalado(gray_code_to_binary(j)) << 1)) });
                 break;}
             
             case Z_ORDER:
@@ -177,12 +186,12 @@ void draw_curve_iterative(Type type) {
             ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
             switch (type)
             {
-            case GRAY:
+            case DOUBLE_GRAY:
                 {vec.push_back({ i, j, gray_code(intercalado(i) | (intercalado(j) << 1)) });
                 break;}
             
-            case DOUBLE_GRAY:
-                {vec.push_back({ i, j, gray_code(intercalado(gray_code(i)) | (intercalado(gray_code(j)) << 1)) });
+            case GRAY:
+                {vec.push_back({ i, j, gray_code_to_binary(intercalado(i) | (intercalado(j) << 1)) });
                 break;}
             
             case Z_ORDER:
