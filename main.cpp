@@ -192,7 +192,16 @@ void draw_curve_iterative(Type type) {
             }
         }
         }
+
+         /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+        Se ordenan los futuros puntos segun el valor
+        que les asignó la curva.
+        ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
         std::sort(vec.begin(), vec.end(), [] (Pixel& a, Pixel& b) {return a.transform < b.transform;});
+
+        /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
+        Se pintanlas lineas
+        ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
         for (int j = 0; j < vec.size()-1; j++) {
             window.clear();
             for (int i = 0; i < j-1; i++) {
@@ -287,14 +296,9 @@ void draw_curve_iterative(Type type) {
             std::cout << scaling << std::endl;
     }
 
-    /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
-    Se ordenan los futuros puntos segun el valor
-    que les asignó la curva.
-    ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+   
 
-    /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
-    Se pintanlas lineas
-    ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
+    
     
 }
 
