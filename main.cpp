@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <vector>
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/System.hpp>
@@ -51,7 +52,7 @@ Variables globales importantes
 int MAX_BITS = 32;
 int scaling = 50;
 uint32_t width = 850, height = 850;
-sf::RenderWindow window(sf::VideoMode(width - 2*scaling, height - 2*scaling), "Space-Filling Curve");
+sf::RenderWindow window(sf::VideoMode(width, height), "Space-Filling Curve");
 
 /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
 Funcion para calcular el ray code
@@ -89,6 +90,20 @@ uint32_t intercalado(uint32_t coord) {
     }
     return coord;
 }
+std::vector<sf::Vector2i> hilbert_vec;
+//hilbert curve algorithm
+void hilbert(float n, float x, float y, float xi, float xj, float yi, float yj) {
+    if (n <= 0) {
+        hilbert_vec.push_back({x + (xi + yi)/2, y + (xj + yj)/2});
+    } else {
+        hilbert(n - 1, x            , y,                yi/2, yj/2, xi/2, xj/2);
+        hilbert(n - 1, x+xi/2       , y+xj/2,           xi/2, xj/2, yi/2, yj/2);
+        hilbert(n - 1, x+xi/2+yi/2  , y+xj/2+yj/2,      xi/2, xj/2, yi/2, yj/2);
+        hilbert(n - 1, x+xi/2+yi    , y+xj/2+yj,        -yi/2, -yj/2, -xi/2, -xj/2);
+    }
+}
+
+
 
 
 /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
@@ -162,96 +177,30 @@ Se define el tipo de curva por defecto
 Type current_type = GRAY;
 
 int main() {
-    draw_curve(current_type);
+    hilbert_vec = std::vector<sf::Vector2i>();
+    int n = 6;
+    hilbert(n, 0, 0, width, 0, 0, height);
+    std::cout << hilbert_vec.size() << std::endl;
+    // draw_curve(current_type);
+    for (int i = 0; i < hilbert_vec.size()-1; i++) {
+        sf::Vertex line1[] = {
+            sf::Vertex(sf::Vector2f(hilbert_vec[i].x, hilbert_vec[i].y), sf::Color(0, 255, 0)),
+            sf::Vertex(sf::Vector2f(hilbert_vec[i + 1].x, hilbert_vec[i + 1].y), sf::Color(0, 255, 0))
+        };
+        window.draw(line1, 2, sf::Lines);
+    }
+    window.display();
+
     while (window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
         {
-            switch (event.type){
-                case sf::Event::Closed:
-                {
-                    window.close();
-                    return 0;
-                }
-                case sf::Event::KeyPressed:
-                {
-                    switch (event.key.code)
-                    {
-                        case sf::Keyboard::Add:
-                        {
-                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
-                            Si se presiona el +, el factor de escalado 
-                            aumenta hasta que llegue un máximo 1000
-                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
-                            if (!(scaling-1000)) break;
-                            scaling++;
-                            window.clear();
-                            draw_curve(current_type);
-                            break;
-                        }
-                        case sf::Keyboard::Subtract:
-                        {
-                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
-                            Si se presiona el -, el factor de escalado 
-                            disminuye hasta que llegue un mínimo de 5
-                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
-                            if (scaling < 5) break;
-                            scaling--;
-                            window.clear();
-                            draw_curve(current_type);
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case sf::Event::KeyReleased:
-                {
-                    switch (event.key.code)
-                    {
-                        case sf::Keyboard::Num1:
-                        {
-                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
-                            Si se presiona el 1, entonces se muestra el
-                            GRAY filling curve.
-                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
-                            if (current_type == GRAY) break;
-                            current_type = GRAY;
-                            window.clear();
-                            draw_curve(current_type);
-                            break;
-                        }
-                        case sf::Keyboard::Num2:
-                        {
-                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
-                            Si se presiona el 2, entonces se muestra el
-                            DOUBLE_GRAY filling curve.
-                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
-                            if (current_type == DOUBLE_GRAY) break;
-                            current_type = DOUBLE_GRAY;
-                            window.clear();
-                            draw_curve(current_type);
-                            break;
-                        }
-                        case sf::Keyboard::Num3:
-                        {
-                            /*✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿
-                            Si se presiona el 3, entonces se muestra el
-                            Z_ORDER filling curve.
-                            ✿ஜீ۞ஜீ✿•.¸¸.•*`*•.•ஜீ☼۞☼ஜீ•.•*`*•.¸¸.•✿ஜீ۞ஜீ✿*/
-                            if (current_type == Z_ORDER) break;
-                            current_type = Z_ORDER;
-                            window.clear();
-                            draw_curve(current_type);
-                            break;
-                        }
-                        break;                        
-                    }
-                }
-                
-            }
+            // Close window: exit
+            if (event.type == sf::Event::Closed)
+                window.close();
         }
-        window.display();
+
 
     }
 
